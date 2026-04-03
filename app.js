@@ -59,6 +59,8 @@ const dom = {
     typeBadge: $('#question-type-badge'),
     topic: $('#question-topic'),
     text: $('#question-text'),
+    imageContainer: $('#question-image-container'),
+    image: $('#question-image'),
     optionsContainer: $('#options-container'),
     numericalContainer: $('#numerical-container'),
     numericalInput: $('#numerical-input'),
@@ -332,6 +334,14 @@ function renderQuestion() {
 
   // Question text
   dom.question.text.textContent = q.text;
+
+  // Question Image
+  if (q.image) {
+    dom.question.image.src = q.image;
+    dom.question.imageContainer.classList.remove('hidden');
+  } else {
+    dom.question.imageContainer.classList.add('hidden');
+  }
 
   // Options / Numerical
   if (q.type === 'mcq') {
