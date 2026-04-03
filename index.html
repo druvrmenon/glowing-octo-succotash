@@ -12,10 +12,20 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+  
+  <!-- Content for PWA, UI Toggle, Analytics -->
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <!-- Animated background particles -->
   <canvas id="particles-canvas"></canvas>
+
+  <!-- Global Action Buttons -->
+  <div class="global-actions">
+    <button id="btn-nta-toggle" class="btn btn-glass btn-sm" title="Toggle NTA Exam Replica Mode">NTA Mode: OFF</button>
+    <button id="btn-cheat-sheet" class="btn btn-glass btn-sm" title="Formula Cheat Sheet">📚 Formulas</button>
+  </div>
 
   <!-- Landing Screen -->
   <div id="landing-screen" class="screen active">
@@ -138,7 +148,10 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
         Previous
       </button>
-      <button id="btn-clear" class="btn btn-outline">Clear Response</button>
+      <div style="display:flex; gap: 8px;">
+        <button id="btn-clear" class="btn btn-outline">Clear Response</button>
+        <button id="btn-show-solution" class="btn btn-outline hidden" style="border-color: #00C9A7; color: #00C9A7;">Show Solution</button>
+      </div>
       <button id="btn-mark" class="btn btn-outline btn-mark">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
         Mark for Review
@@ -172,6 +185,12 @@
 
       <div class="results-stats" id="results-stats"></div>
 
+      <!-- Topic-wise Analytics Chart -->
+      <div class="results-analytics" style="margin: 20px auto; max-width: 500px; max-height: 500px; display: none;" id="topic-chart-container">
+        <h3 style="text-align:center; color: #f0f0f5; margin-bottom: 10px; font-weight: 500;">Topic-Wise Strength Analysis</h3>
+        <canvas id="topicChart"></canvas>
+      </div>
+
       <div class="results-section-breakdown" id="results-breakdown"></div>
 
       <div class="results-actions">
@@ -199,7 +218,47 @@
     </div>
   </div>
 
+  <!-- Formula Cheat Sheet Modal -->
+  <div class="modal-overlay hidden" id="formula-modal-overlay">
+    <div class="modal" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+      <h2 class="modal-title">📚 Quick Cheat Sheet</h2>
+      <div class="modal-text" style="text-align: left; margin-bottom: 20px;">
+        <h3 style="color:#6C63FF; margin-top:10px;">Physics</h3>
+        <ul>
+          <li>Kinematics: $v = u + at$, $S = ut + \frac{1}{2}at^2$, $v^2 = u^2 + 2aS$</li>
+          <li>Energy: $KE = \frac{1}{2}mv^2$, $PE = mgh$</li>
+          <li>Optics: $\frac{1}{f} = \frac{1}{v} - \frac{1}{u}$</li>
+        </ul>
+        <h3 style="color:#00C9A7; margin-top:10px;">Chemistry</h3>
+        <ul>
+          <li>Ideal Gas Law: $PV = nRT$</li>
+          <li>First Law of Thermo: $\Delta U = q + w$</li>
+          <li>Arrhenius Equation: $k = Ae^{-E_a/RT}$</li>
+        </ul>
+        <h3 style="color:#FF6B6B; margin-top:10px;">Mathematics</h3>
+        <ul>
+          <li>Quadratic Formula: $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$</li>
+          <li>Integration: $\int_{0}^{a} f(x)dx = \int_{0}^{a} f(a-x)dx$</li>
+          <li>Taylor Series: $e^x = \sum_{n=0}^{\infty} \frac{x^n}{n!}$</li>
+        </ul>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="btn-close-formula">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast for Time Tracking Warning -->
+  <div id="toast-container" class="toast-container"></div>
+
   <script src="data.js"></script>
   <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Registration failed', err));
+      });
+    }
+  </script>
 </body>
 </html>

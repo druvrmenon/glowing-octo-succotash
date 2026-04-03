@@ -18,7 +18,9 @@ const state = {
   reviewMode: false,
   timerInterval: null,
   timeRemaining: 0,
-  startTime: null
+  startTime: null,
+  timeSpent: {},         // questionId -> time in ms
+  questionEntryTime: 0   // timestamp when current question was shown
 };
 
 // ==========================================
@@ -71,7 +73,8 @@ const dom = {
     prev: $('#btn-prev'),
     next: $('#btn-next'),
     clear: $('#btn-clear'),
-    mark: $('#btn-mark')
+    mark: $('#btn-mark'),
+    showSolution: $('#btn-show-solution')
   },
 
   modal: {
@@ -80,6 +83,16 @@ const dom = {
     text: $('#modal-text'),
     cancel: $('#modal-cancel'),
     confirm: $('#modal-confirm')
+  },
+  
+  advancedUI: {
+    ntaToggle: $('#btn-nta-toggle'),
+    cheatSheetBtn: $('#btn-cheat-sheet'),
+    formulaModalOverlay: $('#formula-modal-overlay'),
+    closeFormulaBtn: $('#btn-close-formula'),
+    toastContainer: $('#toast-container'),
+    topicChartContainer: $('#topic-chart-container'),
+    topicChart: $('#topicChart')
   },
 
   results: {
@@ -289,8 +302,40 @@ function startTimer() {
       submitQuiz();
     }
     updateTimerDisplay();
+
+    // Time-Per-Question warning
+    if (state.questionEntryTime && !state.reviewMode && !state.submitted) {
+      const spentMs = Date.now() - state.questionEntryTime;
+      if (spentMs > 150000) { // 2.5 minutes
+        const currentQId = state.questions[state.currentIndex].id;
+        if (!state.timeSpent[currentQId + '_warned']) {
+          showToast('Warning: You have spent over 2.5 minutes on this question!');
+          state.timeSpent[currentQId + '_warned'] = true;
+        }
+      }
+    }
+
   }, 1000);
   updateTimerDisplay();
+}
+
+function showToast(message) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = message;
+  dom.advancedUI.toastContainer.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+function updateTimeTracking() {
+  if (state.questionEntryTime && !state.reviewMode && !state.submitted) {
+    const qId = state.questions[state.currentIndex]?.id;
+    if (qId) {
+      const spent = Date.now() - state.questionEntryTime;
+      state.timeSpent[qId] = (state.timeSpent[qId] || 0) + spent;
+    }
+  }
+  state.questionEntryTime = Date.now();
 }
 
 function updateTimerDisplay() {
@@ -313,6 +358,7 @@ function updateTimerDisplay() {
 // Question Rendering
 // ==========================================
 function renderQuestion() {
+  updateTimeTracking();
   const q = state.questions[state.currentIndex];
   const idx = state.currentIndex;
 
@@ -389,10 +435,12 @@ function renderQuestion() {
     dom.footer.clear.classList.add('hidden');
     dom.footer.mark.classList.add('hidden');
     dom.header.submit.classList.add('hidden');
+    dom.footer.showSolution.classList.remove('hidden');
   } else {
     dom.footer.clear.classList.remove('hidden');
     dom.footer.mark.classList.remove('hidden');
     dom.header.submit.classList.remove('hidden');
+    dom.footer.showSolution.classList.add('hidden');
   }
 
   // Render LaTeX math
@@ -488,6 +536,7 @@ function buildRibbon() {
 
   dom.ribbon.querySelectorAll('.q-nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      updateTimeTracking();
       state.currentIndex = parseInt(btn.dataset.index);
       renderQuestion();
     });
@@ -526,10 +575,17 @@ function calculateScore() {
   let correct = 0, wrong = 0, unanswered = 0;
   const sectionScores = {};
 
+  const topicScores = {};
+
   state.questions.forEach(q => {
     const key = q.sectionName;
+    const topic = q.topic || 'General';
+
     if (!sectionScores[key]) sectionScores[key] = { correct: 0, wrong: 0, unanswered: 0, total: 0, icon: q.sectionIcon, color: q.sectionColor };
+    if (!topicScores[topic]) topicScores[topic] = { total: 0, correct: 0 };
+    
     sectionScores[key].total++;
+    topicScores[topic].total++;
 
     const saved = state.answers[q.id];
     if (!saved) {
@@ -547,10 +603,16 @@ function calculateScore() {
       if (parseFloat(saved.value) === parseFloat(q.answer)) {
         correct++;
         sectionScores[key].correct++;
+        topicScores[topic].correct++;
       } else {
         wrong++;
         sectionScores[key].wrong++;
       }
+    }
+    
+    // Supplement MCQ correct scoring
+    if (q.type === 'mcq' && saved && saved.value === q.answer) {
+      topicScores[topic].correct++;
     }
   });
 
@@ -558,7 +620,7 @@ function calculateScore() {
   const totalScore = (correct * paper.marking.correct) + (wrong * paper.marking.incorrect);
   const maxScore = state.questions.length * paper.marking.correct;
 
-  return { correct, wrong, unanswered, totalScore, maxScore, sectionScores };
+  return { correct, wrong, unanswered, totalScore, maxScore, sectionScores, topicScores };
 }
 
 function updateScore() {
@@ -673,6 +735,54 @@ function showResults(results) {
   });
 
   dom.results.breakdown.innerHTML = breakdownHTML;
+
+  // Render Topic-Wise Strength Chart.js
+  if (Object.keys(results.topicScores).length > 0) {
+    dom.advancedUI.topicChartContainer.style.display = 'block';
+    const labels = Object.keys(results.topicScores);
+    const dataPoints = labels.map(l => {
+      const t = results.topicScores[l];
+      return t.total > 0 ? (t.correct / t.total) * 100 : 0;
+    });
+
+    if (window.myTopicChart) {
+      window.myTopicChart.destroy();
+    }
+    
+    // Check if NTA Mode is active for text colors
+    const isNta = document.body.classList.contains('nta-mode');
+    const color = isNta ? '#333' : '#f0f0f5';
+
+    window.myTopicChart = new Chart(dom.advancedUI.topicChart, {
+      type: 'radar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Accuracy %',
+          data: dataPoints,
+          backgroundColor: 'rgba(108, 99, 255, 0.2)',
+          borderColor: '#6c63ff',
+          pointBackgroundColor: '#00c9a7',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        scales: { 
+          r: { 
+            min: 0, 
+            max: 100, 
+            ticks: { display: false }, 
+            grid: { color: isNta ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)' }, 
+            pointLabels: { color: color, font: {size: 10} } 
+          } 
+        },
+        plugins: { legend: { display: false } },
+        maintainAspectRatio: false
+      }
+    });
+  } else {
+    dom.advancedUI.topicChartContainer.style.display = 'none';
+  }
 }
 
 // ==========================================
@@ -841,6 +951,86 @@ function init() {
         }
         break;
     }
+  });
+
+  // Swipe-to-Navigate Logic
+  let touchStartX = 0;
+  dom.question.container.addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, {passive: true});
+  
+  dom.question.container.addEventListener('touchend', e => {
+    const touchEndX = e.changedTouches[0].screenX;
+    if (touchStartX - touchEndX > 50) { // Swipe Left (Next)
+      if (state.currentIndex < state.questions.length - 1) dom.footer.next.click();
+    } else if (touchEndX - touchStartX > 50) { // Swipe Right (Prev)
+      if (state.currentIndex > 0) dom.footer.prev.click();
+    }
+  });
+
+  // NTA Mode Toggle Logic
+  dom.advancedUI.ntaToggle.addEventListener('click', () => {
+    document.body.classList.toggle('nta-mode');
+    const isNta = document.body.classList.contains('nta-mode');
+    dom.advancedUI.ntaToggle.textContent = 'NTA Mode: ' + (isNta ? 'ON' : 'OFF');
+  });
+
+  // Formula Cheat Sheet Logic
+  dom.advancedUI.cheatSheetBtn.addEventListener('click', () => {
+    dom.advancedUI.formulaModalOverlay.classList.remove('hidden');
+    setTimeout(() => {
+      if (window.renderMathInElement) {
+        renderMathInElement(dom.advancedUI.formulaModalOverlay, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+          ],
+          throwOnError: false
+        });
+      }
+    }, 50);
+  });
+  
+  dom.advancedUI.closeFormulaBtn.addEventListener('click', () => {
+    dom.advancedUI.formulaModalOverlay.classList.add('hidden');
+  });
+
+  // Mock Step-by-Step Solution Trigger
+  dom.footer.showSolution.addEventListener('click', () => {
+    const q = state.questions[state.currentIndex];
+    
+    dom.modal.title.textContent = 'Step-by-Step Solution';
+    
+    // Fallback Mock Template
+    dom.modal.text.innerHTML = `
+      <div style="text-align:left; line-height: 1.6;">
+        <p><strong>Topic:</strong> ${q.topic}</p><br>
+        <div style="background: rgba(108, 99, 255, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #6C63FF; color:#00C9A7;">
+          <p><strong>General Approach:</strong><br>
+          This is a dynamically generated solution framework for Question ${q.id}. Since no absolute step-by-step text exists in the database for this specific problem, remember to trace back to standard formulas.</p>
+          <br><p><strong>Step 1:</strong> Identify given parameters and necessary constants.</p>
+          <p><strong>Step 2:</strong> Build the equational relationship.</p>
+          <p><strong>Step 3:</strong> Solve carefully, considering sign conventions and unit conversions.</p>
+        </div>
+      </div>
+    `;
+
+    // Alter default modal buttons to function as an "Okay/Close" box
+    dom.modal.overlay.classList.remove('hidden');
+    dom.modal.cancel.classList.add('hidden');
+    
+    const confirmOriginalText = dom.modal.confirm.textContent;
+    const confirmOriginalClick = dom.modal.confirm.onclick;
+    dom.modal.confirm.textContent = 'Close Solution Mode';
+    
+    dom.modal.confirm.onclick = () => {
+      dom.modal.overlay.classList.add('hidden');
+      dom.modal.cancel.classList.remove('hidden');
+      
+      // Cleanup events
+      dom.modal.confirm.textContent = confirmOriginalText;
+      dom.modal.confirm.onclick = confirmOriginalClick;
+    };
   });
 }
 

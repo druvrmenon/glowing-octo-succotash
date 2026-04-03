@@ -1389,3 +1389,126 @@ body {
 .hidden {
   display: none !important;
 }
+
+/* ==========================================
+   Advanced Features (NTA Mode, Toasts, PWA)
+   ========================================== */
+
+/* Global Actions (FABs) */
+.global-actions {
+  position: fixed;
+  top: 15px;
+  right: 20px;
+  display: flex;
+  gap: 15px;
+  z-index: 1000;
+}
+
+/* NTA Replica Mode Overrides */
+body.nta-mode {
+  font-family: Arial, sans-serif !important;
+  background: #f4f4f4 !important;
+  color: #333 !important;
+}
+body.nta-mode #particles-canvas {
+  display: none !important;
+}
+body.nta-mode .quiz-header {
+  background: #2563eb !important;
+  border-bottom: none !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  backdrop-filter: none !important;
+}
+body.nta-mode .header-left,
+body.nta-mode .header-center,
+body.nta-mode .header-right {
+  color: white !important;
+}
+body.nta-mode .score-pill, 
+body.nta-mode .current-section-badge {
+  background: rgba(255,255,255,0.2) !important;
+  border: 1px solid rgba(255,255,255,0.4) !important;
+  color: #fff !important;
+}
+body.nta-mode .quiz-main {
+  background: #ffffff !important;
+  border: 1px solid #ccc !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+body.nta-mode .question-container {
+  color: #000 !important;
+}
+body.nta-mode .option-btn {
+  background: #f9f9f9 !important;
+  border: 1px solid #ddd !important;
+  color: #000 !important;
+  border-radius: 4px !important;
+}
+body.nta-mode .option-btn:hover {
+  background: #eef2ff !important;
+}
+body.nta-mode .option-btn.selected {
+  background: #dbeafe !important;
+  border-color: #2563eb !important;
+  color: #000 !important;
+}
+body.nta-mode .quiz-footer {
+  background: #fff !important;
+  border-top: 1px solid #ccc !important;
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
+}
+body.nta-mode .btn-glass, 
+body.nta-mode .btn-outline {
+  background: #e5e7eb !important;
+  border: 1px solid #d1d5db !important;
+  color: #374151 !important;
+  border-radius: 4px !important;
+}
+body.nta-mode .btn-primary {
+  background: #16a34a !important; /* Green save & next */
+  border: 1px solid #15803d !important;
+  border-radius: 4px !important;
+}
+body.nta-mode .btn-mark {
+  background: #ca8a04 !important; /* Orange mark */
+  color: white !important;
+  border: 1px solid #a16207 !important;
+}
+
+/* Toast Container */
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 2000;
+  pointer-events: none;
+}
+
+.toast {
+  background: rgba(255, 69, 58, 0.9);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  animation: slide-up-toast 0.4s ease forwards, slide-down-toast 0.4s ease 3.6s forwards;
+}
+
+@keyframes slide-up-toast {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-down-toast {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(20px); }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "JEE Mains Quiz Pro",
+  "short_name": "JEE Quiz",
+  "description": "A comprehensive JEE Mains Quiz application with advanced analytics and offline capabilities.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#4a00e0",
+  "icons": [
+    {
+      "src": "https://placehold.co/192x192/4a00e0/ffffff?text=JEE",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://placehold.co/512x512/4a00e0/ffffff?text=JEE",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
