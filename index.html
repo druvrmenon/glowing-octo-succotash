@@ -83,8 +83,42 @@
 
   <!-- Quiz Screen -->
   <div id="quiz-screen" class="screen">
-    <!-- Top Bar -->
-    <header class="quiz-header">
+    
+    <!-- NTA Specific Headers -->
+    <div class="nta-specific hidden-in-default">
+      <div class="nta-top-header">
+        <div class="nta-logo-box">
+          <svg viewBox="0 0 100 100" width="40" height="40" style="margin-right:10px;"><circle cx="50" cy="50" r="45" fill="#14a34b"/><path d="M25 50 l15 15 l40 -40" stroke="white" stroke-width="12" fill="none"/></svg>
+          <div>
+            <div style="font-weight: bold; color: #0f1b40; font-size: 1.2rem;">NATIONAL TESTING AGENCY</div>
+            <div style="color: #0f1b40; font-size: 0.75rem; font-style: italic;">Excellence in Assessment</div>
+          </div>
+        </div>
+        <div class="nta-candidate-info">
+          <div class="nta-avatar">👤</div>
+          <div class="nta-info-text">
+            <div>Candidate Name : <strong>[Applicant]</strong></div>
+            <div>Subject Name : <strong style="color:#d97706;">JEE Main 2026</strong></div>
+            <div style="display:flex; align-items:center;">Remaining Time : <span class="nta-timer-badge" id="nta-timer-display">03:00:00</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="nta-orange-bar">
+        <div class="nta-tabs-left">
+          <div class="nta-bar-title" style="font-weight:bold; margin-right:10px;">JEE MAIN</div>
+          <div class="nta-subject-tab active" id="nta-tab-physics">PHYSICS</div>
+          <div class="nta-subject-tab" id="nta-tab-chemistry">CHEMISTRY</div>
+          <div class="nta-subject-tab" id="nta-tab-math">MATHEMATICS</div>
+        </div>
+        <div class="nta-lang-right">
+          Paper Language: 
+          <select style="padding: 2px 5px; margin-left: 5px;"><option>English</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Default Top Bar -->
+    <header class="quiz-header hidden-in-nta">
       <div class="header-left">
         <button id="btn-home" class="btn btn-icon-only" title="Back to Home">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -107,16 +141,21 @@
     </header>
 
     <!-- Progress Bar -->
-    <div class="progress-container">
+    <div class="progress-container hidden-in-nta">
       <div class="progress-bar" id="progress-bar"></div>
       <div class="progress-text" id="progress-text">1 / 25</div>
     </div>
 
+    <!-- Layout Wrapper -->
+    <div class="nta-layout-wrapper">
+      <!-- Left Pane -->
+      <div class="nta-main-pane">
+        <!-- Question Area -->
+
     <!-- Question Navigation Ribbon -->
     <div class="question-nav-ribbon" id="question-nav-ribbon"></div>
 
-    <!-- Question Area -->
-    <main class="quiz-main">
+        <main class="quiz-main">
       <div class="question-container" id="question-container">
         <div class="question-meta">
           <span class="question-number" id="question-number">Q1</span>
@@ -142,25 +181,62 @@
       </div>
     </main>
 
-    <!-- Bottom Navigation -->
-    <footer class="quiz-footer">
-      <button id="btn-prev" class="btn btn-glass">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-        Previous
-      </button>
-      <div style="display:flex; gap: 8px;">
-        <button id="btn-clear" class="btn btn-outline">Clear Response</button>
-        <button id="btn-show-solution" class="btn btn-outline hidden" style="border-color: #00C9A7; color: #00C9A7;">Show Solution</button>
+        <!-- Bottom Navigation -->
+        <footer class="quiz-footer hidden-in-nta">
+          <button id="btn-prev" class="btn btn-glass">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            Previous
+          </button>
+          <div style="display:flex; gap: 8px;">
+            <button id="btn-clear" class="btn btn-outline">Clear Response</button>
+            <button id="btn-show-solution" class="btn btn-outline hidden" style="border-color: #00C9A7; color: #00C9A7;">Show Solution</button>
+          </div>
+          <button id="btn-mark" class="btn btn-outline btn-mark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            Mark for Review
+          </button>
+          <button id="btn-next" class="btn btn-primary">
+            Next
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </footer>
+
+        <!-- NTA Specific Footer Buttons -->
+        <div class="nta-internal-footer hidden-in-default nta-specific">
+          <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button id="nta-btn-save-next" class="btn-nta nta-green">SAVE & NEXT</button>
+            <button id="nta-btn-save-mark" class="btn-nta nta-orange">SAVE & MARK FOR REVIEW</button>
+            <button id="nta-btn-clear" class="btn-nta nta-white">CLEAR RESPONSE</button>
+            <button id="nta-btn-mark-next" class="btn-nta nta-blue">MARK FOR REVIEW & NEXT</button>
+          </div>
+        </div>
+
+      </div> <!-- End Left Pane -->
+
+      <!-- Right Pane -->
+      <div class="nta-side-pane">
+        <!-- NTA Legend -->
+        <div class="nta-legend-box hidden-in-default nta-specific">
+          <div class="legend-grid">
+            <div class="legend-item"><div class="legend-icon shape-not-visited">20</div> Not Visited</div>
+            <div class="legend-item"><div class="legend-icon shape-not-answered">5</div> Not Answered</div>
+            <div class="legend-item"><div class="legend-icon shape-answered">1</div> Answered</div>
+            <div class="legend-item"><div class="legend-icon shape-marked">2</div> Marked for Review</div>
+            <div class="legend-item" style="grid-column: span 2;"><div class="legend-icon shape-answered-marked">0<span class="green-dot"></span></div> Answered & Marked for Review</div>
+          </div>
+        </div>
+
+        <!-- Question Navigation Ribbon -->
+        <div class="question-nav-ribbon" id="question-nav-ribbon"></div>
       </div>
-      <button id="btn-mark" class="btn btn-outline btn-mark">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-        Mark for Review
-      </button>
-      <button id="btn-next" class="btn btn-primary">
-        Next
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-    </footer>
+    </div> <!-- End Layout Wrapper -->
+
+    <!-- NTA Global Status Footer -->
+    <div class="nta-global-footer hidden-in-default nta-specific">
+      <button id="nta-btn-back" class="btn-nta nta-white">&lt;&lt; BACK</button>
+      <button id="nta-btn-next-global" class="btn-nta nta-white">NEXT &gt;&gt;</button>
+      <button id="nta-btn-submit" class="btn-nta nta-green" style="margin-left: auto;">SUBMIT</button>
+    </div>
   </div>
 
   <!-- Results Screen -->

@@ -92,7 +92,22 @@ const dom = {
     closeFormulaBtn: $('#btn-close-formula'),
     toastContainer: $('#toast-container'),
     topicChartContainer: $('#topic-chart-container'),
-    topicChart: $('#topicChart')
+    topicChart: $('#topicChart'),
+    ntaTopTimer: $('#nta-timer-display'),
+    ntaTabs: {
+      physics: $('#nta-tab-physics'),
+      chemistry: $('#nta-tab-chemistry'),
+      math: $('#nta-tab-math')
+    },
+    ntaBtns: {
+      saveNext: $('#nta-btn-save-next'),
+      saveMark: $('#nta-btn-save-mark'),
+      clear: $('#nta-btn-clear'),
+      markNext: $('#nta-btn-mark-next'),
+      back: $('#nta-btn-back'),
+      nextGlobal: $('#nta-btn-next-global'),
+      submit: $('#nta-btn-submit')
+    }
   },
 
   results: {
@@ -343,8 +358,10 @@ function updateTimerDisplay() {
   const h = Math.floor(t / 3600);
   const m = Math.floor((t % 3600) / 60);
   const s = t % 60;
-  dom.header.timerDisplay.textContent =
-    `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  
+  dom.header.timerDisplay.textContent = timeStr;
+  if(dom.advancedUI.ntaTopTimer) dom.advancedUI.ntaTopTimer.textContent = timeStr;
 
   dom.header.timer.classList.remove('warning', 'danger');
   if (t <= 300) {
@@ -374,9 +391,15 @@ function renderQuestion() {
     dom.question.typeBadge.classList.remove('numerical');
   }
 
-  // Section badge
+  // Section badge & NTA tabs
   dom.header.sectionBadge.textContent = `${q.sectionIcon} ${q.sectionName}`;
   dom.header.sectionBadge.style.borderColor = q.sectionColor;
+
+  const secName = q.sectionName.toLowerCase();
+  Object.values(dom.advancedUI.ntaTabs).forEach(t => t?.classList.remove('active'));
+  if (secName.includes('phys')) dom.advancedUI.ntaTabs.physics?.classList.add('active');
+  if (secName.includes('chem')) dom.advancedUI.ntaTabs.chemistry?.classList.add('active');
+  if (secName.includes('math')) dom.advancedUI.ntaTabs.math?.classList.add('active');
 
   // Question text
   dom.question.text.textContent = q.text;
@@ -973,6 +996,25 @@ function init() {
     document.body.classList.toggle('nta-mode');
     const isNta = document.body.classList.contains('nta-mode');
     dom.advancedUI.ntaToggle.textContent = 'NTA Mode: ' + (isNta ? 'ON' : 'OFF');
+  });
+
+  // NTA Specific Event Forwarding
+  dom.advancedUI.ntaBtns.saveNext?.addEventListener('click', () => dom.footer.next.click());
+  dom.advancedUI.ntaBtns.clear?.addEventListener('click', () => dom.footer.clear.click());
+  dom.advancedUI.ntaBtns.back?.addEventListener('click', () => dom.footer.prev.click());
+  dom.advancedUI.ntaBtns.nextGlobal?.addEventListener('click', () => dom.footer.next.click());
+  dom.advancedUI.ntaBtns.submit?.addEventListener('click', () => dom.header.submit.click());
+  
+  dom.advancedUI.ntaBtns.markNext?.addEventListener('click', () => {
+    const q = state.questions[state.currentIndex];
+    if (!state.marked.has(q.id)) dom.footer.mark.click();
+    dom.footer.next.click();
+  });
+  
+  dom.advancedUI.ntaBtns.saveMark?.addEventListener('click', () => {
+    const q = state.questions[state.currentIndex];
+    if (!state.marked.has(q.id)) dom.footer.mark.click();
+    dom.footer.next.click();
   });
 
   // Formula Cheat Sheet Logic

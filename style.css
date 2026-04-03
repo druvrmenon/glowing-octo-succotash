@@ -1404,79 +1404,296 @@ body {
   z-index: 1000;
 }
 
-/* NTA Replica Mode Overrides */
+/* ==========================================
+   NTA REPLICA MODE - EXACT CLONE
+   ========================================== */
+
+/* Toggle Visibility Classes */
+body:not(.nta-mode) .hidden-in-default { display: none !important; }
+body.nta-mode .hidden-in-nta { display: none !important; }
+
+/* Structural Resets for NTA Mode */
 body.nta-mode {
   font-family: Arial, sans-serif !important;
-  background: #f4f4f4 !important;
+  background: #ffffff !important;
   color: #333 !important;
+  overflow: hidden; /* App becomes full-screen rigid */
+  margin: 0;
+  padding: 0;
 }
-body.nta-mode #particles-canvas {
-  display: none !important;
-}
-body.nta-mode .quiz-header {
-  background: #2563eb !important;
-  border-bottom: none !important;
+body.nta-mode #particles-canvas { display: none !important; }
+
+body.nta-mode #quiz-screen {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
   border-radius: 0 !important;
+  padding: 0 !important;
   margin: 0 !important;
-  backdrop-filter: none !important;
 }
-body.nta-mode .header-left,
-body.nta-mode .header-center,
-body.nta-mode .header-right {
-  color: white !important;
+
+/* NTA Header Structures */
+.nta-top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background: #fff;
+  border-bottom: 2px solid #ccc;
+  height: 65px;
 }
-body.nta-mode .score-pill, 
-body.nta-mode .current-section-badge {
-  background: rgba(255,255,255,0.2) !important;
-  border: 1px solid rgba(255,255,255,0.4) !important;
-  color: #fff !important;
+.nta-logo-box {
+  display: flex;
+  align-items: center;
+}
+.nta-candidate-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #ccc;
+  padding: 5px 15px;
+  border-radius: 4px;
+}
+.nta-avatar {
+  font-size: 2.5rem;
+  color: #666;
+}
+.nta-info-text {
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+.nta-timer-badge {
+  background: #2a70b8;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 5px;
+  font-weight: bold;
+}
+
+.nta-orange-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f29422;
+  height: 35px;
+  color: white;
+  font-size: 0.85rem;
+  padding: 0 10px;
+}
+.nta-tabs-left {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+.nta-subject-tab {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  background: #2a70b8;
+  margin-right: 2px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.nta-subject-tab.active {
+  background: #fff;
+  color: #2a70b8;
+}
+
+/* Base Layout Wrapper */
+body.nta-mode .nta-layout-wrapper {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Left Pane (Main Question Area) */
+body.nta-mode .nta-main-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 15px 20px;
+  overflow-y: auto;
+  border-right: 1px solid #ccc;
 }
 body.nta-mode .quiz-main {
-  background: #ffffff !important;
-  border: 1px solid #ccc !important;
-  border-radius: 4px !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
+  all: unset !important; /* Strip default quiz-main */
+  flex: 1;
+  display: block !important;
 }
 body.nta-mode .question-container {
   color: #000 !important;
+  font-size: 1rem !important;
 }
-body.nta-mode .option-btn {
-  background: #f9f9f9 !important;
-  border: 1px solid #ddd !important;
-  color: #000 !important;
-  border-radius: 4px !important;
+body.nta-mode .question-meta {
+  border-bottom: 2px solid #ccc;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
 }
-body.nta-mode .option-btn:hover {
-  background: #eef2ff !important;
+body.nta-mode .question-number {
+  font-weight: bold;
+  font-size: 1.1rem;
 }
-body.nta-mode .option-btn.selected {
-  background: #dbeafe !important;
-  border-color: #2563eb !important;
-  color: #000 !important;
+body.nta-mode .question-type-badge, 
+body.nta-mode .question-topic {
+  display: none !important; /* Hide modern badges */
 }
-body.nta-mode .quiz-footer {
-  background: #fff !important;
-  border-top: 1px solid #ccc !important;
+
+/* Override Options */
+body.nta-mode .options-container {
+  display: block !important; /* vertical stack */
+  counter-reset: nta-opt;
+}
+body.nta-mode .option {
+  background: none !important;
+  border: none !important;
+  padding: 8px 0 !important;
   border-radius: 0 !important;
-  backdrop-filter: none !important;
+  display: flex;
+  align-items: center;
 }
-body.nta-mode .btn-glass, 
-body.nta-mode .btn-outline {
-  background: #e5e7eb !important;
-  border: 1px solid #d1d5db !important;
-  color: #374151 !important;
-  border-radius: 4px !important;
+body.nta-mode .option-letter {
+  display: inline-block;
+  background: none !important;
+  color: transparent !important;
+  font-weight: normal;
+  margin-right: -10px;
+  counter-increment: nta-opt;
+  position: relative;
 }
-body.nta-mode .btn-primary {
-  background: #16a34a !important; /* Green save & next */
-  border: 1px solid #15803d !important;
-  border-radius: 4px !important;
+body.nta-mode .option-letter::before {
+  content: "(" counter(nta-opt) ") ";
+  color: #333 !important;
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 1rem;
 }
-body.nta-mode .btn-mark {
-  background: #ca8a04 !important; /* Orange mark */
-  color: white !important;
-  border: 1px solid #a16207 !important;
+body.nta-mode .option.selected .option-letter {
+  font-weight: bold;
+  color: #16a34a !important; /* Green selected indicator */
+}
+body.nta-mode .option.selected {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Internal Buttons (Save & Next area) */
+.btn-nta {
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.btn-nta.nta-green { background: #5cb85c; color: white; border-color: #4cae4c; }
+.btn-nta.nta-orange { background: #f0ad4e; color: white; border-color: #eea236; }
+.btn-nta.nta-white { background: #fff; color: #333; }
+.btn-nta.nta-blue { background: #337ab7; color: white; border-color: #2e6da4; margin-top: 10px; width: fit-content;}
+
+body.nta-mode .nta-internal-footer {
+  border-top: 1px solid #ccc;
+  padding-top: 20px;
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Right Pane (Legend + Ribbon) */
+body.nta-mode .nta-side-pane {
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+  background: #fdfdfd;
+}
+.nta-legend-box {
+  padding: 15px;
+  border-bottom: 1px solid #ccc;
+}
+.legend-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px 5px;
+  font-size: 0.75rem;
+  color: #333;
+}
+.legend-item { display: flex; align-items: center; gap: 8px; }
+.legend-icon {
+  width: 30px; height: 30px;
+  display: flex;
+  justify-content: center; align-items: center;
+  color: white; font-weight: bold; font-size: 0.85rem;
+  position: relative;
+}
+
+/* CSS Shapes targeting exact Prometric elements */
+.shape-not-visited {
+  background: transparent; color: #333;
+  border: 1px solid #ccc;
+}
+.shape-not-answered {
+  background: #d9534f;
+  clip-path: polygon(0 0, 100% 0, 100% 75%, 75% 100%, 0 100%);
+}
+.shape-answered {
+  background: #5cb85c;
+  clip-path: polygon(0 25%, 25% 0, 100% 0, 100% 100%, 0 100%);
+}
+.shape-marked {
+  background: #5bc0de;
+  border-radius: 50%;
+}
+.shape-answered-marked {
+  background: #5bc0de;
+  border-radius: 50%;
+}
+.green-dot {
+  position: absolute; bottom: 0; right: 0;
+  width: 10px; height: 10px; background: #5cb85c;
+  border-radius: 50%; border: 1px solid white;
+}
+
+/* Override Ribbon internally */
+body.nta-mode .question-nav-ribbon {
+  padding: 15px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  justify-content: start;
+  flex-wrap: wrap; /* in case of fallback */
+}
+body.nta-mode .q-nav-btn {
+  width: 45px; height: 40px;
+  border-radius: 0 !important;
+  background: white; border: 1px solid #ccc;
+  color: #333;
+  margin: 0;
+  clip-path: none !important; /* resets */
+}
+body.nta-mode .q-nav-btn:hover { transform: none !important; background: #eee; }
+body.nta-mode .q-nav-btn.active { outline: 2px solid #000; box-shadow: none !important; }
+
+/* Apply Palette shapes strictly based on state */
+body.nta-mode .q-nav-btn.answered {
+  background: #5cb85c; color: white; border: none;
+  clip-path: polygon(0 25%, 25% 0, 100% 0, 100% 100%, 0 100%);
+}
+body.nta-mode .q-nav-btn.marked {
+  background: #5bc0de; color: white; border: none; border-radius: 50% !important;
+}
+
+/* Global Navigation Footer */
+.nta-global-footer {
+  height: 50px;
+  background: #f1f1f1;
+  border-top: 1px solid #ccc;
+  display: flex !important;
+  align-items: center;
+  padding: 0 20px;
+  gap: 15px;
 }
 
 /* Toast Container */
